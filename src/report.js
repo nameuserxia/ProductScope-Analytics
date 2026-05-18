@@ -39,6 +39,7 @@ export function generateMarkdown(data) {
   const couplings = list(get(data, "模块耦合关系", []));
   const optimizations = list(get(data, "优化建议", []));
   const interview = get(data, "面试表达版总结", {});
+  const dataImages = list(get(data, "数据图片", []));
   const customSections = list(get(data, "自定义扩展章节", []));
 
   const lines = [
@@ -285,12 +286,27 @@ export function generateMarkdown(data) {
     bullets(get(interview, "能力", []))
   );
 
+  if (dataImages.length) {
+    lines.push("", "## 10. 数据图片与截图证据");
+    dataImages.forEach((image, index) => {
+      lines.push(
+        "",
+        `### 10.${index + 1} ${get(image, "标题", "图片证据")}`,
+        "",
+        get(image, "说明", ""),
+        "",
+        `![${get(image, "标题", "图片证据")}](${get(image, "图片数据", "")})`
+      );
+    });
+  }
+
   if (customSections.length) {
-    lines.push("", "## 10. 自定义扩展分析");
+    const sectionNumber = dataImages.length ? 11 : 10;
+    lines.push("", `## ${sectionNumber}. 自定义扩展分析`);
     customSections.forEach((section, index) => {
       lines.push(
         "",
-        `### 10.${index + 1} ${get(section, "标题", "补充分析")}`,
+        `### ${sectionNumber}.${index + 1} ${get(section, "标题", "补充分析")}`,
         "",
         get(section, "内容", ""),
         "",

@@ -48,6 +48,7 @@ KEY_ALIASES = {
     "couplings": ["模块耦合关系分析", "模块耦合关系", "耦合关系"],
     "optimizations": ["优化建议框架", "优化建议"],
     "interview_summary": ["求职作品集表达", "面试表达版总结", "面试总结"],
+    "data_images": ["数据图片", "图片素材", "数据图片与截图证据"],
     "custom_sections": ["自定义扩展章节", "扩展章节", "补充分析"],
     "acquisition": ["新增指标"],
     "activity": ["活跃指标"],
@@ -146,6 +147,9 @@ KEY_ALIASES = {
     "abilities": ["体现能力", "能力"],
     "content": ["内容"],
     "items": ["分析要点", "要点"],
+    "filename": ["文件名"],
+    "image_data": ["图片数据", "图片地址", "图片URL", "图片 URL"],
+    "caption": ["说明", "图片说明"],
 }
 
 JOURNEY_NAMES = {
@@ -602,20 +606,20 @@ def render_interview_summary(data: dict[str, Any]) -> str:
     )
 
 
-def render_custom_sections(data: dict[str, Any]) -> str:
+def render_custom_sections(data: dict[str, Any], section_number: int = 10) -> str:
     """渲染用户自定义扩展章节，避免报告结构被固定死。"""
     custom_sections = as_list(get_any(data, "custom_sections"))
     if not custom_sections:
         return ""
 
     sections: Section = [
-        "## 10. 自定义扩展分析",
+        f"## {section_number}. 自定义扩展分析",
         "",
         "以下内容来自 YAML 中的自定义扩展章节，可用于补充竞品分析、埋点设计、SQL 样例、截图观察、版本复盘等个性化内容。",
     ]
     for index, item in enumerate(custom_sections, start=1):
         if isinstance(item, dict):
-            sections.extend(["", f"### 10.{index} {value(item, 'title')}"])
+            sections.extend(["", f"### {section_number}.{index} {value(item, 'title')}"])
             content = get_any(item, "content")
             if content:
                 sections.extend(["", str(content)])
@@ -624,6 +628,27 @@ def render_custom_sections(data: dict[str, Any]) -> str:
                 sections.extend(["", bullet_list(items)])
         else:
             sections.extend(["", f"### 10.{index} 补充分析", "", str(item)])
+    return "\n".join(sections)
+
+
+def render_data_images(data: dict[str, Any], section_number: int = 10) -> str:
+    """渲染数据图片、图表和截图证据。"""
+    images = as_list(get_any(data, "data_images"))
+    if not images:
+        return ""
+
+    sections: Section = [f"## {section_number}. 数据图片与截图证据"]
+    for index, item in enumerate(images, start=1):
+        if not isinstance(item, dict):
+            continue
+        title = value(item, "title", f"图片证据 {index}")
+        image_data = value(item, "image_data", "")
+        caption = value(item, "caption", "")
+        sections.extend(["", f"### {section_number}.{index} {title}", ""])
+        if caption:
+            sections.extend([caption, ""])
+        if image_data:
+            sections.append(f"![{title}]({image_data})")
     return "\n".join(sections)
 
 
@@ -654,7 +679,10 @@ def generate_report(data: dict[str, Any]) -> str:
         render_interview_summary(data),
         "",
     ]
-    custom_sections = render_custom_sections(data)
+    image_sections = render_data_images(data, 10)
+    if image_sections:
+        sections.extend([image_sections, ""])
+    custom_sections = render_custom_sections(data, 11 if image_sections else 10)
     if custom_sections:
         sections.extend([custom_sections, ""])
     return "\n".join(sections)

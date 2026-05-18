@@ -431,6 +431,95 @@ textarea:focus {
   gap: 14px;
 }
 
+.empty-state {
+  display: grid;
+  place-items: center;
+  min-height: 280px;
+  padding: 32px;
+  text-align: center;
+  color: #62717e;
+  background: #f8fafb;
+  border: 1px dashed #b9c7d1;
+  border-radius: 8px;
+}
+
+.empty-state svg {
+  color: #1f7f74;
+}
+
+.empty-state strong {
+  margin-top: 10px;
+  color: #17212b;
+  font-size: 18px;
+}
+
+.empty-state p {
+  max-width: 480px;
+  margin: 6px 0 0;
+  line-height: 1.6;
+}
+
+.image-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.image-card {
+  overflow: hidden;
+  background: #f9fbfc;
+  border: 1px solid #dce5eb;
+  border-radius: 8px;
+}
+
+.image-frame {
+  display: grid;
+  place-items: center;
+  height: 240px;
+  background:
+    linear-gradient(45deg, #edf2f5 25%, transparent 25%),
+    linear-gradient(-45deg, #edf2f5 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #edf2f5 75%),
+    linear-gradient(-45deg, transparent 75%, #edf2f5 75%);
+  background-color: #f8fafb;
+  background-position:
+    0 0,
+    0 10px,
+    10px -10px,
+    -10px 0;
+  background-size: 20px 20px;
+  border-bottom: 1px solid #dce5eb;
+}
+
+.image-frame img {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.image-card-body {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+}
+
+.file-caption {
+  margin: 0;
+  color: #7a8792;
+  font-size: 12px;
+}
+
+.markdown-preview img {
+  display: block;
+  max-width: 100%;
+  max-height: 520px;
+  margin: 10px 0 18px;
+  object-fit: contain;
+  border: 1px solid #dce5eb;
+  border-radius: 8px;
+}
+
 .inline-title-row,
 .metric-row-head {
   display: flex;
