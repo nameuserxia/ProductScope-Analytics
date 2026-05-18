@@ -17,10 +17,14 @@ const metricCategories = [
 
 const table = (headers, rows) => {
   const safeRows = rows.length ? rows : [headers.map(() => "待补充")];
+  const safeCell = (cell) =>
+    String(cell || "待补充")
+      .replace(/\|/g, "\\|")
+      .replace(/\n/g, "<br>");
   return [
     `| ${headers.join(" | ")} |`,
     `| ${headers.map(() => "---").join(" | ")} |`,
-    ...safeRows.map((row) => `| ${row.map((cell) => String(cell || "待补充").replace(/\n/g, "<br>")).join(" | ")} |`),
+    ...safeRows.map((row) => `| ${row.map((cell) => safeCell(cell)).join(" | ")} |`),
   ].join("\n");
 };
 
@@ -44,6 +48,13 @@ const pushImages = (lines, images, heading = "图片证据", headingLevel = 3) =
       "",
       `![${get(image, "标题", "图片证据")}](${get(image, "图片数据", "")})`
     );
+  });
+};
+
+const pushFieldBlocks = (lines, object, fields, headingLevel = 4) => {
+  const headingMarks = "#".repeat(headingLevel);
+  fields.forEach((field) => {
+    lines.push("", `${headingMarks} ${field}`, "", get(object, field, "待补充"));
   });
 };
 
@@ -164,14 +175,14 @@ export function generateMarkdown(data) {
     lines.push(
       "",
       `### 4.${index + 1} ${get(module, "模块名称", "未命名模块")}`,
-      "",
-      table(
-        ["分析项", "内容"],
-        ["模块入口", "模块功能描述", "用户侧作用", "产品侧作用", "商业化作用", "留存作用", "活跃作用", "社交传播作用", "设计动机推测"].map(
-          (key) => [key, get(module, key, "待补充")]
-        )
-      ),
-      "",
+    );
+    pushFieldBlocks(
+      lines,
+      module,
+      ["模块入口", "模块功能描述", "用户侧作用", "产品侧作用", "商业化作用", "留存作用", "活跃作用", "社交传播作用", "设计动机推测"],
+      4
+    );
+    lines.push(
       "#### 设计优点",
       "",
       bullets(get(module, "设计优点", [])),

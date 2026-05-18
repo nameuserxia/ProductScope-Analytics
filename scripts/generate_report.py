@@ -211,9 +211,19 @@ def table(headers: list[str], rows: list[list[Any]]) -> str:
     divider_row = "| " + " | ".join(["---"] * len(headers)) + " |"
     body_rows = []
     for row in rows:
-        cells = [str(cell).replace("\n", "<br>") if cell is not None else "待补充" for cell in row]
+        cells = [
+            str(cell).replace("|", "\\|").replace("\n", "<br>") if cell is not None else "待补充"
+            for cell in row
+        ]
         body_rows.append("| " + " | ".join(cells) + " |")
     return "\n".join([header_row, divider_row, *body_rows])
+
+
+def append_field_blocks(sections: Section, data: dict[str, Any], fields: list[tuple[str, str]], heading_level: int = 4) -> None:
+    """把自由文本字段渲染为独立 Markdown 小节，支持用户输入表格、列表等 Markdown。"""
+    heading_marks = "#" * heading_level
+    for title, key in fields:
+        sections.extend(["", f"{heading_marks} {title}", "", value(data, key)])
 
 
 def render_basic_info(data: dict[str, Any]) -> str:
@@ -417,22 +427,26 @@ def render_modules(data: dict[str, Any]) -> str:
             [
                 "",
                 f"### 4.{index} {value(module, 'name')}",
-                "",
-                table(
-                    ["分析项", "内容"],
-                    [
-                        ["模块入口", value(module, "entry")],
-                        ["模块功能描述", value(module, "description")],
-                        ["用户侧作用", value(module, "user_value")],
-                        ["产品侧作用", value(module, "product_value")],
-                        ["商业化作用", value(module, "monetization_value")],
-                        ["留存作用", value(module, "retention_value")],
-                        ["活跃作用", value(module, "activity_value")],
-                        ["社交传播作用", value(module, "social_value")],
-                        ["设计动机推测", value(module, "design_motivation")],
-                    ],
-                ),
-                "",
+            ]
+        )
+        append_field_blocks(
+            sections,
+            module,
+            [
+                ("模块入口", "entry"),
+                ("模块功能描述", "description"),
+                ("用户侧作用", "user_value"),
+                ("产品侧作用", "product_value"),
+                ("商业化作用", "monetization_value"),
+                ("留存作用", "retention_value"),
+                ("活跃作用", "activity_value"),
+                ("社交传播作用", "social_value"),
+                ("设计动机推测", "design_motivation"),
+            ],
+            4,
+        )
+        sections.extend(
+            [
                 "#### 设计优点",
                 "",
                 bullet_list(get_any(module, "advantages")),
