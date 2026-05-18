@@ -1,4 +1,6 @@
 __pycache__/
+node_modules/
+dist/
 *.py[cod]
 .pytest_cache/
 .mypy_cache/

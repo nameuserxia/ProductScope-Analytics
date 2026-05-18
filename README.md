@@ -41,19 +41,19 @@ game-product-analysis-framework/
 
 ## 快速开始
 
-1. 安装依赖：
+### Python 报告生成
 
 ```bash
 pip install pyyaml
 ```
 
-2. 生成示例报告：
+生成示例报告：
 
 ```bash
 python scripts/generate_report.py data/sample_game.yaml reports/sample_report.md
 ```
 
-3. 查看生成结果：
+查看生成结果：
 
 ```bash
 open reports/sample_report.md
@@ -64,6 +64,29 @@ Windows PowerShell 可以使用：
 ```powershell
 notepad reports/sample_report.md
 ```
+
+### 可视化编辑器
+
+如果不想直接编辑 YAML，可以使用 React 前端工作台：
+
+```bash
+npm install
+npm run dev
+```
+
+然后打开终端显示的本地地址，默认是：
+
+```text
+http://127.0.0.1:5173/
+```
+
+前端工作台支持：
+
+- 导入 YAML 配置。
+- 可视化编辑产品基础信息、定位、核心玩法、功能模块、指标体系、优化实验和扩展章节。
+- 实时预览 Markdown 报告。
+- 检查作品集是否覆盖留存、付费、广告、用户分层、A/B Test 等关键分析项。
+- 导出 YAML 和 Markdown。
 
 ## 如何分析一款新游戏
 
