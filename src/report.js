@@ -33,6 +33,12 @@ const bullets = (items) => {
   return rows.length ? rows.map((item) => `- ${item}`).join("\n") : "- 待补充";
 };
 
+const flexibleContent = (content) => {
+  if (Array.isArray(content)) return bullets(content);
+  if (typeof content === "string" && content.trim()) return content;
+  return "待补充";
+};
+
 const pushImages = (lines, images, heading = "图片证据", headingLevel = 3) => {
   const rows = list(images);
   if (!rows.length) return;
@@ -185,15 +191,15 @@ export function generateMarkdown(data) {
     lines.push(
       "#### 设计优点",
       "",
-      bullets(get(module, "设计优点", [])),
+      flexibleContent(get(module, "设计优点", [])),
       "",
       "#### 潜在风险",
       "",
-      bullets(get(module, "潜在风险", [])),
+      flexibleContent(get(module, "潜在风险", [])),
       "",
       "#### 可优化方向",
       "",
-      bullets(get(module, "可优化方向", [])),
+      flexibleContent(get(module, "可优化方向", [])),
       "",
       "#### 关键指标",
       "",
@@ -209,7 +215,7 @@ export function generateMarkdown(data) {
       "",
       "#### 可验证的数据分析方法",
       "",
-      bullets(get(module, "可验证的数据分析方法", []))
+      flexibleContent(get(module, "可验证的数据分析方法", []))
     );
     pushImages(lines, moduleImages, "图片证据", 4);
   });

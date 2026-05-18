@@ -205,6 +205,15 @@ def bullet_list(items: Any) -> str:
     return "\n".join(rows) if rows else "- 待补充"
 
 
+def flexible_content(content: Any) -> str:
+    """兼容短列表和长 Markdown 文本。"""
+    if isinstance(content, list):
+        return bullet_list(content)
+    if isinstance(content, str) and content.strip():
+        return content
+    return "待补充"
+
+
 def table(headers: list[str], rows: list[list[Any]]) -> str:
     """渲染 Markdown 表格。"""
     header_row = "| " + " | ".join(headers) + " |"
@@ -449,15 +458,15 @@ def render_modules(data: dict[str, Any]) -> str:
             [
                 "#### 设计优点",
                 "",
-                bullet_list(get_any(module, "advantages")),
+                flexible_content(get_any(module, "advantages")),
                 "",
                 "#### 潜在问题",
                 "",
-                bullet_list(get_any(module, "risks")),
+                flexible_content(get_any(module, "risks")),
                 "",
                 "#### 可优化方向",
                 "",
-                bullet_list(get_any(module, "optimization_directions")),
+                flexible_content(get_any(module, "optimization_directions")),
                 "",
                 "#### 关联模块",
                 "",
@@ -473,7 +482,7 @@ def render_modules(data: dict[str, Any]) -> str:
                 "",
                 "#### 可验证的数据分析方法",
                 "",
-                bullet_list(get_any(module, "analysis_methods")),
+                flexible_content(get_any(module, "analysis_methods")),
             ]
         )
         module_images = as_list(get_any(module, "module_images"))

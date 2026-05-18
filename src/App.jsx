@@ -66,6 +66,7 @@ const parseYaml = (text) => yaml.load(text);
 const ensureArray = (value) => (Array.isArray(value) ? value : []);
 const lineSplit = (text) => text.split("\n").map((item) => item.trim()).filter(Boolean);
 const lineJoin = (items) => ensureArray(items).join("\n");
+const contentToText = (value) => (Array.isArray(value) ? value.join("\n") : value || "");
 const draftKey = "productscope.analytics.studio.draft.v1";
 const maxImageSize = 2 * 1024 * 1024;
 
@@ -471,26 +472,16 @@ function App() {
                         </Field>
                       ))}
                     </div>
-                    <TextareaList
-                      label="设计优点"
-                      value={lineJoin(selected["设计优点"])}
-                      onChange={(value) => updateModule(selectedModule, { 设计优点: lineSplit(value) })}
-                    />
-                    <TextareaList
-                      label="潜在风险"
-                      value={lineJoin(selected["潜在风险"])}
-                      onChange={(value) => updateModule(selectedModule, { 潜在风险: lineSplit(value) })}
-                    />
-                    <TextareaList
-                      label="可优化方向"
-                      value={lineJoin(selected["可优化方向"])}
-                      onChange={(value) => updateModule(selectedModule, { 可优化方向: lineSplit(value) })}
-                    />
-                    <TextareaList
-                      label="可验证的数据分析方法"
-                      value={lineJoin(selected["可验证的数据分析方法"])}
-                      onChange={(value) => updateModule(selectedModule, { 可验证的数据分析方法: lineSplit(value) })}
-                    />
+                    {["设计优点", "潜在风险", "可优化方向", "可验证的数据分析方法"].map((field) => (
+                      <Field label={field} key={field}>
+                        <SmartTextarea
+                          label={field}
+                          value={contentToText(selected[field])}
+                          onChange={(value) => updateModule(selectedModule, { [field]: value })}
+                          openFullscreen={setFullscreenEditor}
+                        />
+                      </Field>
+                    ))}
                     <EvidenceSection
                       title="模块图片证据"
                       note="上传这个模块对应的图表、路径截图、竞品截图或问题证据。"
