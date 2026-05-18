@@ -38,6 +38,116 @@ METRIC_CATEGORY_NAMES = {
     "monitoring": "异常监控指标",
 }
 
+KEY_ALIASES = {
+    "product": ["产品基础信息", "产品"],
+    "positioning": ["产品定位分析", "定位分析"],
+    "core_gameplay": ["核心玩法拆解", "核心玩法"],
+    "modules": ["功能模块拆解", "功能模块", "适用模块"],
+    "user_journeys": ["用户体验路径分析", "用户路径"],
+    "metrics": ["数据指标体系", "指标体系", "指标", "可能关注指标", "关键指标"],
+    "couplings": ["模块耦合关系分析", "模块耦合关系", "耦合关系"],
+    "optimizations": ["优化建议框架", "优化建议"],
+    "interview_summary": ["求职作品集表达", "面试表达版总结", "面试总结"],
+    "custom_sections": ["自定义扩展章节", "扩展章节", "补充分析"],
+    "acquisition": ["新增指标"],
+    "activity": ["活跃指标"],
+    "retention": ["留存指标"],
+    "payment": ["付费指标"],
+    "conversion": ["转化指标"],
+    "level_task": ["关卡 / 对局 / 任务指标", "关卡/对局/任务指标", "关卡任务指标"],
+    "economy": ["经济系统指标"],
+    "ads": ["广告变现指标"],
+    "social": ["社交指标"],
+    "segmentation": ["用户分层指标"],
+    "monitoring": ["异常监控指标"],
+    "new_user": ["新用户路径"],
+    "active_user": ["老用户日常路径"],
+    "paid_user": ["付费用户路径"],
+    "churn_risk_user": ["流失用户可能卡点", "流失用户路径"],
+    "returning_user": ["回流用户路径"],
+    "name": ["名称", "产品名称", "模块名称", "指标名称"],
+    "genre": ["游戏类型"],
+    "target_users": ["目标用户"],
+    "monetization": ["商业化模式"],
+    "version": ["体验版本"],
+    "experience_time": ["体验时间"],
+    "analysis_goal": ["分析目标"],
+    "user_needs": ["用户需求"],
+    "scenarios": ["使用场景"],
+    "selling_points": ["产品卖点", "卖点"],
+    "differentiation": ["差异化竞争点", "差异化"],
+    "target_personas": ["目标用户画像", "用户画像"],
+    "why_play": ["用户为什么要玩", "为什么玩"],
+    "scene": ["场景"],
+    "user_state": ["用户状态"],
+    "product_value": ["产品价值", "产品侧作用"],
+    "characteristics": ["用户特征", "特征"],
+    "needs": ["主要需求", "需求"],
+    "key_metrics": ["关键指标"],
+    "core_loop": ["核心循环"],
+    "full_path": ["完整路径", "用户完整路径"],
+    "fun_points": ["核心爽点", "爽点"],
+    "growth_path": ["用户成长路径", "成长路径"],
+    "goal_feedback_achievement": ["目标反馈成就", "目标感反馈感成就感"],
+    "goal": ["目标感"],
+    "feedback": ["反馈感"],
+    "achievement": ["成就感"],
+    "step": ["步骤"],
+    "user_action": ["用户行为"],
+    "behavior": ["用户行为"],
+    "system_feedback": ["系统反馈"],
+    "psychology": ["用户心理"],
+    "churn_risk": ["可能流失点", "流失风险"],
+    "churn_reason": ["可能流失原因", "流失原因"],
+    "optimization": ["优化策略", "优化方向", "可以如何优化", "优化方案", "我的优化建议"],
+    "entry": ["模块入口", "入口"],
+    "description": ["模块功能描述", "功能描述"],
+    "user_value": ["用户侧作用"],
+    "monetization_value": ["商业化作用"],
+    "retention_value": ["留存作用"],
+    "activity_value": ["活跃作用"],
+    "social_value": ["社交传播作用"],
+    "design_motivation": ["设计动机推测", "设计动机"],
+    "advantages": ["设计优点", "优点"],
+    "risks": ["潜在风险", "风险"],
+    "risk": ["潜在风险", "风险"],
+    "optimization_directions": ["可优化方向"],
+    "related_modules": ["关联模块"],
+    "abnormal_reasons": ["指标异常时的可能原因", "异常原因"],
+    "analysis_methods": ["可验证的数据分析方法", "分析方法"],
+    "definition": ["指标定义", "定义"],
+    "formula": ["计算口径"],
+    "meaning": ["业务意义"],
+    "up_means": ["升高说明", "指标升高说明什么"],
+    "down_means": ["下降说明", "指标下降说明什么"],
+    "source": ["来源模块"],
+    "target": ["影响模块", "目标模块", "实验对象"],
+    "relation_type": ["关系类型"],
+    "logic": ["影响逻辑", "逻辑"],
+    "validation": ["验证方法"],
+    "title": ["标题", "优化建议标题"],
+    "current_problem": ["当前问题"],
+    "evidence": ["问题证据", "证据"],
+    "affected_users": ["影响用户"],
+    "affected_metrics": ["影响指标"],
+    "solution": ["优化方案"],
+    "expected_benefit": ["预期收益"],
+    "ab_test": ["A/B Test 验证方案", "A/B Test"],
+    "success_criteria": ["成功判断标准"],
+    "control": ["对照组"],
+    "experiment": ["实验组"],
+    "core_metrics": ["核心指标"],
+    "guardrail_metrics": ["护栏指标"],
+    "duration": ["实验周期"],
+    "background": ["项目背景"],
+    "method": ["我的拆解方法", "拆解方法"],
+    "findings": ["我的核心发现", "核心发现"],
+    "metrics_design": ["我的指标体系设计", "指标体系设计"],
+    "abilities": ["体现能力", "能力"],
+    "content": ["内容"],
+    "items": ["分析要点", "要点"],
+}
+
 JOURNEY_NAMES = {
     "new_user": "新用户路径",
     "active_user": "老用户日常路径",
@@ -56,9 +166,19 @@ def load_yaml(path: str | Path) -> dict[str, Any]:
     return data
 
 
+def get_any(data: dict[str, Any], key: str, default: Any = None) -> Any:
+    """按英文标准字段或中文别名读取字段。"""
+    if not isinstance(data, dict):
+        return default
+    for alias in [key, *KEY_ALIASES.get(key, [])]:
+        if alias in data:
+            return data[alias]
+    return default
+
+
 def value(data: dict[str, Any], key: str, default: str = "待补充") -> str:
     """安全读取字典字段，并把空值转换为中文占位。"""
-    item = data.get(key, default)
+    item = get_any(data, key, default)
     if item is None or item == "":
         return default
     return str(item)
@@ -93,7 +213,7 @@ def table(headers: list[str], rows: list[list[Any]]) -> str:
 
 
 def render_basic_info(data: dict[str, Any]) -> str:
-    product = data.get("product", {})
+    product = get_any(data, "product", {})
     rows = [
         ["产品名称", value(product, "name")],
         ["游戏类型", value(product, "genre")],
@@ -108,9 +228,9 @@ def render_basic_info(data: dict[str, Any]) -> str:
 
 
 def render_positioning(data: dict[str, Any]) -> str:
-    positioning = data.get("positioning", {})
+    positioning = get_any(data, "positioning", {})
     scenario_rows = []
-    for item in as_list(positioning.get("scenarios")):
+    for item in as_list(get_any(positioning, "scenarios")):
         if isinstance(item, dict):
             scenario_rows.append(
                 [
@@ -121,7 +241,7 @@ def render_positioning(data: dict[str, Any]) -> str:
                 ]
             )
     persona_rows = []
-    for item in as_list(positioning.get("target_personas")):
+    for item in as_list(get_any(positioning, "target_personas")):
         if isinstance(item, dict):
             persona_rows.append(
                 [
@@ -138,7 +258,7 @@ def render_positioning(data: dict[str, Any]) -> str:
             "",
             "### 用户需求",
             "",
-            bullet_list(positioning.get("user_needs")),
+            bullet_list(get_any(positioning, "user_needs")),
             "",
             "### 使用场景",
             "",
@@ -146,11 +266,11 @@ def render_positioning(data: dict[str, Any]) -> str:
             "",
             "### 产品卖点",
             "",
-            bullet_list(positioning.get("selling_points")),
+            bullet_list(get_any(positioning, "selling_points")),
             "",
             "### 差异化竞争点",
             "",
-            bullet_list(positioning.get("differentiation")),
+            bullet_list(get_any(positioning, "differentiation")),
             "",
             "### 目标用户画像",
             "",
@@ -164,9 +284,9 @@ def render_positioning(data: dict[str, Any]) -> str:
 
 
 def render_core_loop(data: dict[str, Any]) -> str:
-    core = data.get("core_gameplay", {})
+    core = get_any(data, "core_gameplay", {})
     path_rows = []
-    for item in as_list(core.get("full_path")):
+    for item in as_list(get_any(core, "full_path")):
         if isinstance(item, dict):
             path_rows.append(
                 [
@@ -178,7 +298,7 @@ def render_core_loop(data: dict[str, Any]) -> str:
                     value(item, "metrics"),
                 ]
             )
-    achievement = core.get("goal_feedback_achievement", {})
+    achievement = get_any(core, "goal_feedback_achievement", {})
     achievement_rows = []
     if isinstance(achievement, dict):
         achievement_rows = [
@@ -193,7 +313,7 @@ def render_core_loop(data: dict[str, Any]) -> str:
             "",
             "### 核心循环",
             "",
-            bullet_list(core.get("core_loop")),
+            bullet_list(get_any(core, "core_loop")),
             "",
             "### 用户从进入游戏到获得反馈的完整路径",
             "",
@@ -204,11 +324,11 @@ def render_core_loop(data: dict[str, Any]) -> str:
             "",
             "### 核心爽点",
             "",
-            bullet_list(core.get("fun_points")),
+            bullet_list(get_any(core, "fun_points")),
             "",
             "### 用户成长路径",
             "",
-            bullet_list(core.get("growth_path")),
+            bullet_list(get_any(core, "growth_path")),
             "",
             "### 游戏如何制造目标感、反馈感、成就感",
             "",
@@ -240,7 +360,7 @@ def render_metric_table(metrics: list[Metric]) -> str:
 
 def render_modules(data: dict[str, Any]) -> str:
     sections: Section = ["## 4. 功能模块拆解"]
-    modules = as_list(data.get("modules"))
+    modules = as_list(get_any(data, "modules"))
     if not modules:
         return "\n".join([*sections, "", "待补充"])
 
@@ -248,7 +368,7 @@ def render_modules(data: dict[str, Any]) -> str:
         if not isinstance(module, dict):
             continue
         key_metric_rows = []
-        for metric in as_list(module.get("key_metrics")):
+        for metric in as_list(get_any(module, "key_metrics")):
             if isinstance(metric, dict):
                 key_metric_rows.append(
                     [
@@ -281,19 +401,19 @@ def render_modules(data: dict[str, Any]) -> str:
                 "",
                 "#### 设计优点",
                 "",
-                bullet_list(module.get("advantages")),
+                bullet_list(get_any(module, "advantages")),
                 "",
                 "#### 潜在问题",
                 "",
-                bullet_list(module.get("risks")),
+                bullet_list(get_any(module, "risks")),
                 "",
                 "#### 可优化方向",
                 "",
-                bullet_list(module.get("optimization_directions")),
+                bullet_list(get_any(module, "optimization_directions")),
                 "",
                 "#### 关联模块",
                 "",
-                bullet_list(module.get("related_modules")),
+                bullet_list(get_any(module, "related_modules")),
                 "",
                 "#### 关键指标",
                 "",
@@ -301,25 +421,25 @@ def render_modules(data: dict[str, Any]) -> str:
                 "",
                 "#### 指标异常时的可能原因",
                 "",
-                bullet_list(module.get("abnormal_reasons")),
+                bullet_list(get_any(module, "abnormal_reasons")),
                 "",
                 "#### 可验证的数据分析方法",
                 "",
-                bullet_list(module.get("analysis_methods")),
+                bullet_list(get_any(module, "analysis_methods")),
             ]
         )
     return "\n".join(sections)
 
 
 def render_user_journeys(data: dict[str, Any]) -> str:
-    journeys = data.get("user_journeys", {})
+    journeys = get_any(data, "user_journeys", {})
     sections: Section = ["## 5. 用户体验路径分析"]
     if not isinstance(journeys, dict) or not journeys:
         return "\n".join([*sections, "", "待补充"])
 
     for key, title in JOURNEY_NAMES.items():
         rows = []
-        for item in as_list(journeys.get(key)):
+        for item in as_list(get_any(journeys, key)):
             if isinstance(item, dict):
                 rows.append(
                     [
@@ -343,7 +463,7 @@ def render_user_journeys(data: dict[str, Any]) -> str:
 
 
 def render_metrics(data: dict[str, Any]) -> str:
-    metrics = data.get("metrics", {})
+    metrics = get_any(data, "metrics", {})
     sections: Section = [
         "## 6. 数据指标体系",
         "",
@@ -353,13 +473,13 @@ def render_metrics(data: dict[str, Any]) -> str:
         return "\n".join([*sections, "", "待补充"])
 
     for key, title in METRIC_CATEGORY_NAMES.items():
-        sections.extend(["", f"### {title}", "", render_metric_table(as_list(metrics.get(key)))])
+        sections.extend(["", f"### {title}", "", render_metric_table(as_list(get_any(metrics, key)))])
     return "\n".join(sections)
 
 
 def render_couplings(data: dict[str, Any]) -> str:
     rows = []
-    for item in as_list(data.get("couplings")):
+    for item in as_list(get_any(data, "couplings")):
         if isinstance(item, dict):
             rows.append(
                 [
@@ -388,14 +508,14 @@ def render_couplings(data: dict[str, Any]) -> str:
 
 def render_optimizations(data: dict[str, Any]) -> str:
     sections: Section = ["## 8. 优化建议框架"]
-    optimizations = as_list(data.get("optimizations"))
+    optimizations = as_list(get_any(data, "optimizations"))
     if not optimizations:
         return "\n".join([*sections, "", "待补充"])
 
     for index, item in enumerate(optimizations, start=1):
         if not isinstance(item, dict):
             continue
-        ab_test = item.get("ab_test", {})
+        ab_test = get_any(item, "ab_test", {})
         ab_rows = []
         if isinstance(ab_test, dict):
             ab_rows = [
@@ -415,8 +535,8 @@ def render_optimizations(data: dict[str, Any]) -> str:
                     ["分析项", "内容"],
                     [
                         ["当前问题", value(item, "current_problem")],
-                        ["影响用户", "、".join(str(user) for user in as_list(item.get("affected_users"))) or "待补充"],
-                        ["影响指标", "、".join(str(metric) for metric in as_list(item.get("affected_metrics"))) or "待补充"],
+                        ["影响用户", "、".join(str(user) for user in as_list(get_any(item, "affected_users"))) or "待补充"],
+                        ["影响指标", "、".join(str(metric) for metric in as_list(get_any(item, "affected_metrics"))) or "待补充"],
                         ["优化方案", value(item, "solution")],
                         ["预期收益", value(item, "expected_benefit")],
                         ["成功判断标准", value(item, "success_criteria")],
@@ -425,11 +545,11 @@ def render_optimizations(data: dict[str, Any]) -> str:
                 "",
                 "#### 问题证据",
                 "",
-                bullet_list(item.get("evidence")),
+                bullet_list(get_any(item, "evidence")),
                 "",
                 "#### 潜在风险",
                 "",
-                bullet_list(item.get("risks")),
+                bullet_list(get_any(item, "risks")),
                 "",
                 "#### A/B Test 验证方案",
                 "",
@@ -440,7 +560,7 @@ def render_optimizations(data: dict[str, Any]) -> str:
 
 
 def render_interview_summary(data: dict[str, Any]) -> str:
-    summary = data.get("interview_summary", {})
+    summary = get_any(data, "interview_summary", {})
     if not isinstance(summary, dict):
         summary = {}
     return "\n".join(
@@ -461,7 +581,7 @@ def render_interview_summary(data: dict[str, Any]) -> str:
             "",
             "### 我的核心发现",
             "",
-            bullet_list(summary.get("findings")),
+            bullet_list(get_any(summary, "findings")),
             "",
             "### 我的指标体系设计",
             "",
@@ -477,13 +597,38 @@ def render_interview_summary(data: dict[str, Any]) -> str:
             "",
             "### 这个项目体现了我的哪些能力",
             "",
-            bullet_list(summary.get("abilities")),
+            bullet_list(get_any(summary, "abilities")),
         ]
     )
 
 
+def render_custom_sections(data: dict[str, Any]) -> str:
+    """渲染用户自定义扩展章节，避免报告结构被固定死。"""
+    custom_sections = as_list(get_any(data, "custom_sections"))
+    if not custom_sections:
+        return ""
+
+    sections: Section = [
+        "## 10. 自定义扩展分析",
+        "",
+        "以下内容来自 YAML 中的自定义扩展章节，可用于补充竞品分析、埋点设计、SQL 样例、截图观察、版本复盘等个性化内容。",
+    ]
+    for index, item in enumerate(custom_sections, start=1):
+        if isinstance(item, dict):
+            sections.extend(["", f"### 10.{index} {value(item, 'title')}"])
+            content = get_any(item, "content")
+            if content:
+                sections.extend(["", str(content)])
+            items = get_any(item, "items")
+            if items:
+                sections.extend(["", bullet_list(items)])
+        else:
+            sections.extend(["", f"### 10.{index} 补充分析", "", str(item)])
+    return "\n".join(sections)
+
+
 def generate_report(data: dict[str, Any]) -> str:
-    product = data.get("product", {})
+    product = get_any(data, "product", {})
     product_name = value(product, "name", "游戏产品")
     sections = [
         f"# {product_name}：游戏产品拆解与数据分析报告",
@@ -509,6 +654,9 @@ def generate_report(data: dict[str, Any]) -> str:
         render_interview_summary(data),
         "",
     ]
+    custom_sections = render_custom_sections(data)
+    if custom_sections:
+        sections.extend([custom_sections, ""])
     return "\n".join(sections)
 
 
