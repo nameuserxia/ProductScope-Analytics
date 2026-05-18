@@ -187,8 +187,25 @@ h1 {
 
 .top-actions {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
+  justify-content: flex-end;
   gap: 10px;
+}
+
+.save-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 38px;
+  padding: 0 12px;
+  color: #2f675f;
+  background: #e9f6f3;
+  border: 1px solid #b8ddd6;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
 }
 
 .tool-button,

@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import yaml from "js-yaml";
 import { marked } from "marked";
 import {
@@ -14,6 +14,7 @@ import {
   Layers3,
   LineChart,
   Plus,
+  RotateCcw,
   Save,
   Sparkles,
   Target,
@@ -62,6 +63,34 @@ const parseYaml = (text) => yaml.load(text);
 const ensureArray = (value) => (Array.isArray(value) ? value : []);
 const lineSplit = (text) => text.split("\n").map((item) => item.trim()).filter(Boolean);
 const lineJoin = (items) => ensureArray(items).join("\n");
+const draftKey = "productscope.analytics.studio.draft.v1";
+
+function loadInitialData() {
+  if (typeof window === "undefined") {
+    return parseYaml(sampleYaml);
+  }
+
+  const draft = window.localStorage.getItem(draftKey);
+  if (!draft) {
+    return parseYaml(sampleYaml);
+  }
+
+  try {
+    const parsed = JSON.parse(draft);
+    return parsed.data || parseYaml(sampleYaml);
+  } catch {
+    return parseYaml(sampleYaml);
+  }
+}
+
+function formatSavedAt(value) {
+  if (!value) return "尚未自动保存";
+  return new Intl.DateTimeFormat("zh-CN", {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  }).format(new Date(value));
+}
 
 function clone(value) {
   return structuredClone(value);
@@ -78,12 +107,24 @@ function downloadFile(filename, text, type = "text/plain;charset=utf-8") {
 }
 
 function App() {
-  const [data, setData] = useState(() => parseYaml(sampleYaml));
+  const [data, setData] = useState(() => loadInitialData());
   const [activeTab, setActiveTab] = useState("basic");
   const [selectedModule, setSelectedModule] = useState(0);
   const [selectedMetricCategory, setSelectedMetricCategory] = useState("留存指标");
   const [importError, setImportError] = useState("");
+  const [saveState, setSaveState] = useState(() => {
+    if (typeof window === "undefined") return { label: "尚未自动保存", savedAt: "" };
+    const draft = window.localStorage.getItem(draftKey);
+    if (!draft) return { label: "尚未自动保存", savedAt: "" };
+    try {
+      const parsed = JSON.parse(draft);
+      return { label: `已恢复草稿 ${formatSavedAt(parsed.savedAt)}`, savedAt: parsed.savedAt || "" };
+    } catch {
+      return { label: "草稿读取失败，已载入示例", savedAt: "" };
+    }
+  });
   const fileRef = useRef(null);
+  const firstSaveRef = useRef(true);
 
   const product = data["产品基础信息"] || {};
   const modules = ensureArray(data["功能模块拆解"]);
@@ -92,6 +133,23 @@ function App() {
   const previewHtml = useMemo(() => marked.parse(markdown), [markdown]);
   const quality = useMemo(() => getQualityChecks(data), [data]);
   const score = Math.round((quality.filter((item) => item.done).length / quality.length) * 100);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return undefined;
+    if (firstSaveRef.current) {
+      firstSaveRef.current = false;
+      return undefined;
+    }
+
+    setSaveState((current) => ({ ...current, label: "正在自动保存..." }));
+    const timer = window.setTimeout(() => {
+      const savedAt = new Date().toISOString();
+      window.localStorage.setItem(draftKey, JSON.stringify({ data, savedAt }));
+      setSaveState({ label: `已自动保存 ${formatSavedAt(savedAt)}`, savedAt });
+    }, 450);
+
+    return () => window.clearTimeout(timer);
+  }, [data]);
 
   const updateSection = (section, nextSection) => {
     setData((current) => ({ ...current, [section]: nextSection }));
@@ -184,6 +242,7 @@ function App() {
       const text = await file.text();
       setData(parseYaml(text));
       setImportError("");
+      setSaveState({ label: "已导入，正在自动保存...", savedAt: "" });
     } catch (error) {
       setImportError(`导入失败：${error.message}`);
     } finally {
@@ -197,6 +256,14 @@ function App() {
 
   const exportMarkdown = () => {
     downloadFile("productscope-report.md", markdown, "text/markdown;charset=utf-8");
+  };
+
+  const resetDraft = () => {
+    const nextData = parseYaml(sampleYaml);
+    setData(nextData);
+    setSelectedModule(0);
+    window.localStorage.removeItem(draftKey);
+    setSaveState({ label: "已清空草稿并恢复示例", savedAt: "" });
   };
 
   const selected = modules[selectedModule] || {};
@@ -247,6 +314,10 @@ function App() {
             <h1>{product["产品名称"] || "未命名产品"}</h1>
           </div>
           <div className="top-actions">
+            <div className="save-status">
+              <Save size={15} />
+              <span>{saveState.label}</span>
+            </div>
             <input ref={fileRef} type="file" accept=".yaml,.yml" onChange={handleImport} hidden />
             <button className="tool-button" onClick={() => fileRef.current?.click()}>
               <FileUp size={17} />
@@ -255,6 +326,10 @@ function App() {
             <button className="tool-button" onClick={exportYaml}>
               <Save size={17} />
               导出 YAML
+            </button>
+            <button className="tool-button" onClick={resetDraft}>
+              <RotateCcw size={17} />
+              清空草稿
             </button>
             <button className="primary-button" onClick={exportMarkdown}>
               <FileDown size={17} />
