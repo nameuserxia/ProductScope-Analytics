@@ -11,6 +11,7 @@ import {
   Eye,
   FileDown,
   FileUp,
+  Maximize2,
   Layers3,
   ImagePlus,
   LineChart,
@@ -20,6 +21,7 @@ import {
   Sparkles,
   Target,
   Trash2,
+  X,
 } from "lucide-react";
 import sampleYaml from "../data/sample_game.yaml?raw";
 import { generateMarkdown } from "./report.js";
@@ -114,6 +116,7 @@ function App() {
   const [selectedModule, setSelectedModule] = useState(0);
   const [selectedMetricCategory, setSelectedMetricCategory] = useState("留存指标");
   const [importError, setImportError] = useState("");
+  const [fullscreenEditor, setFullscreenEditor] = useState(null);
   const [saveState, setSaveState] = useState(() => {
     if (typeof window === "undefined") return { label: "尚未自动保存", savedAt: "" };
     const draft = window.localStorage.getItem(draftKey);
@@ -360,7 +363,12 @@ function App() {
                   {productFields.map((field) => (
                     <Field key={field} label={field}>
                       {field === "分析目标" || field === "核心玩法" || field === "目标用户" ? (
-                        <textarea value={product[field] || ""} onChange={(event) => updateProduct(field, event.target.value)} />
+                        <SmartTextarea
+                          label={field}
+                          value={product[field] || ""}
+                          onChange={(value) => updateProduct(field, value)}
+                          openFullscreen={setFullscreenEditor}
+                        />
                       ) : (
                         <input value={product[field] || ""} onChange={(event) => updateProduct(field, event.target.value)} />
                       )}
@@ -454,7 +462,12 @@ function App() {
                     <div className="form-grid">
                       {moduleTextFields.map((field) => (
                         <Field label={field} key={field}>
-                          <textarea value={selected[field] || ""} onChange={(event) => updateModule(selectedModule, { [field]: event.target.value })} />
+                          <SmartTextarea
+                            label={field}
+                            value={selected[field] || ""}
+                            onChange={(value) => updateModule(selectedModule, { [field]: value })}
+                            openFullscreen={setFullscreenEditor}
+                          />
                         </Field>
                       ))}
                     </div>
@@ -527,9 +540,11 @@ function App() {
                       <div className="metric-grid">
                         {["指标定义", "计算口径", "适用模块", "业务意义", "升高说明", "下降说明", "优化方向"].map((field) => (
                           <Field label={field} key={field}>
-                            <textarea
+                            <SmartTextarea
+                              label={field}
                               value={metric[field] || ""}
-                              onChange={(event) => updateMetric(selectedMetricCategory, index, { [field]: event.target.value })}
+                              onChange={(value) => updateMetric(selectedMetricCategory, index, { [field]: value })}
+                              openFullscreen={setFullscreenEditor}
                             />
                           </Field>
                         ))}
@@ -549,13 +564,13 @@ function App() {
 
             {activeTab === "optimizations" && (
               <Panel title="优化实验" note="建议始终写清楚问题、指标、方案、风险、A/B Test 和成功标准。">
-                <OptimizationEditor data={data} setData={setData} setError={setImportError} />
+                <OptimizationEditor data={data} setData={setData} setError={setImportError} openFullscreen={setFullscreenEditor} />
               </Panel>
             )}
 
             {activeTab === "extensions" && (
               <Panel title="扩展章节" note="这里用来放竞品、埋点、SQL、访谈、截图观察和版本复盘。">
-                <ExtensionEditor data={data} setData={setData} setError={setImportError} />
+                <ExtensionEditor data={data} setData={setData} setError={setImportError} openFullscreen={setFullscreenEditor} />
               </Panel>
             )}
 
@@ -581,6 +596,12 @@ function App() {
           </aside>
         </div>
       </section>
+      {fullscreenEditor && (
+        <FullscreenTextarea
+          editor={fullscreenEditor}
+          onClose={() => setFullscreenEditor(null)}
+        />
+      )}
     </main>
   );
 }
@@ -613,8 +634,71 @@ function TextareaList({ label, value, onChange }) {
   return (
     <label className="field wide">
       <span>{label}</span>
-      <textarea className="list-textarea" value={value || ""} onChange={(event) => onChange(event.target.value)} />
+      <textarea className="list-textarea smart-textarea" value={value || ""} onChange={(event) => onChange(event.target.value)} />
     </label>
+  );
+}
+
+function SmartTextarea({ label, value, onChange, openFullscreen }) {
+  const isMarkdownTable = value.includes("|") && value.includes("---");
+  const lineCount = Math.max(6, Math.min(18, String(value || "").split("\n").length + 2));
+
+  return (
+    <div className="smart-textarea-wrap">
+      <textarea
+        className={`smart-textarea ${isMarkdownTable ? "markdown-mode" : ""}`}
+        style={{ minHeight: `${lineCount * 24}px` }}
+        value={value || ""}
+        onChange={(event) => onChange(event.target.value)}
+      />
+      <button
+        type="button"
+        className="textarea-expand"
+        onClick={() => openFullscreen({ label, value: value || "", onChange })}
+        title="全屏编辑"
+      >
+        <Maximize2 size={15} />
+        全屏
+      </button>
+    </div>
+  );
+}
+
+function FullscreenTextarea({ editor, onClose }) {
+  const [draft, setDraft] = useState(editor.value || "");
+  const isMarkdownTable = draft.includes("|") && draft.includes("---");
+
+  const saveAndClose = () => {
+    editor.onChange(draft);
+    onClose();
+  };
+
+  return (
+    <div className="editor-modal" role="dialog" aria-modal="true">
+      <div className="editor-modal-card">
+        <div className="editor-modal-head">
+          <div>
+            <span>沉浸式编辑</span>
+            <strong>{editor.label}</strong>
+          </div>
+          <button className="icon-button" onClick={onClose} title="关闭">
+            <X size={18} />
+          </button>
+        </div>
+        <textarea
+          className={`fullscreen-textarea ${isMarkdownTable ? "markdown-mode" : ""}`}
+          value={draft}
+          onChange={(event) => setDraft(event.target.value)}
+        />
+        <div className="editor-modal-foot">
+          <span>{draft.split("\n").length} 行 · {draft.length} 字符</span>
+          <div>
+            <button className="tool-button" onClick={onClose}>取消</button>
+            <button className="primary-button" onClick={saveAndClose}>保存并关闭</button>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -683,7 +767,7 @@ function EvidenceSection({ title, note, images, onChange, setError }) {
   );
 }
 
-function OptimizationEditor({ data, setData, setError }) {
+function OptimizationEditor({ data, setData, setError, openFullscreen }) {
   const rows = ensureArray(data["优化建议"]);
   const update = (index, patch) => {
     const next = clone(rows);
@@ -730,7 +814,12 @@ function OptimizationEditor({ data, setData, setError }) {
           <div className="form-grid">
             {["当前问题", "优化方案", "预期收益", "成功判断标准"].map((field) => (
               <Field label={field} key={field}>
-                <textarea value={item[field] || ""} onChange={(event) => update(index, { [field]: event.target.value })} />
+                <SmartTextarea
+                  label={field}
+                  value={item[field] || ""}
+                  onChange={(value) => update(index, { [field]: value })}
+                  openFullscreen={openFullscreen}
+                />
               </Field>
             ))}
           </div>
@@ -749,7 +838,7 @@ function OptimizationEditor({ data, setData, setError }) {
   );
 }
 
-function ExtensionEditor({ data, setData, setError }) {
+function ExtensionEditor({ data, setData, setError, openFullscreen }) {
   const rows = ensureArray(data["自定义扩展章节"]);
   const update = (index, patch) => {
     const next = clone(rows);
@@ -774,7 +863,12 @@ function ExtensionEditor({ data, setData, setError }) {
             <input value={item["标题"] || ""} onChange={(event) => update(index, { 标题: event.target.value })} />
           </Field>
           <Field label="内容">
-            <textarea value={item["内容"] || ""} onChange={(event) => update(index, { 内容: event.target.value })} />
+            <SmartTextarea
+              label="内容"
+              value={item["内容"] || ""}
+              onChange={(value) => update(index, { 内容: value })}
+              openFullscreen={openFullscreen}
+            />
           </Field>
           <TextareaList label="分析要点" value={lineJoin(item["分析要点"])} onChange={(value) => update(index, { 分析要点: lineSplit(value) })} />
           <EvidenceSection
