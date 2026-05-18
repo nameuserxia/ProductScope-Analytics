@@ -38,6 +38,7 @@ const tabs = [
 ];
 
 const productFields = ["产品名称", "游戏类型", "目标用户", "核心玩法", "商业化模式", "体验版本", "体验时间", "分析目标"];
+const productLongTextFields = ["目标用户", "核心玩法", "商业化模式", "分析目标"];
 const moduleTextFields = [
   "模块入口",
   "模块功能描述",
@@ -365,7 +366,7 @@ function App() {
                 <div className="form-grid">
                   {productFields.map((field) => (
                     <Field key={field} label={field}>
-                      {field === "分析目标" || field === "核心玩法" || field === "目标用户" ? (
+                      {productLongTextFields.includes(field) ? (
                         <SmartTextarea
                           label={field}
                           value={product[field] || ""}
