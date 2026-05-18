@@ -48,7 +48,6 @@ KEY_ALIASES = {
     "couplings": ["模块耦合关系分析", "模块耦合关系", "耦合关系"],
     "optimizations": ["优化建议框架", "优化建议"],
     "interview_summary": ["求职作品集表达", "面试表达版总结", "面试总结"],
-    "data_images": ["数据图片", "图片素材", "数据图片与截图证据"],
     "custom_sections": ["自定义扩展章节", "扩展章节", "补充分析"],
     "acquisition": ["新增指标"],
     "activity": ["活跃指标"],
@@ -116,6 +115,7 @@ KEY_ALIASES = {
     "related_modules": ["关联模块"],
     "abnormal_reasons": ["指标异常时的可能原因", "异常原因"],
     "analysis_methods": ["可验证的数据分析方法", "分析方法"],
+    "module_images": ["图片证据", "模块图片", "截图证据"],
     "definition": ["指标定义", "定义"],
     "formula": ["计算口径"],
     "meaning": ["业务意义"],
@@ -432,6 +432,20 @@ def render_modules(data: dict[str, Any]) -> str:
                 bullet_list(get_any(module, "analysis_methods")),
             ]
         )
+        module_images = as_list(get_any(module, "module_images"))
+        if module_images:
+            sections.extend(["", "#### 图片证据"])
+            for image_index, image in enumerate(module_images, start=1):
+                if not isinstance(image, dict):
+                    continue
+                title = value(image, "title", f"图片证据 {image_index}")
+                caption = value(image, "caption", "")
+                image_data = value(image, "image_data", "")
+                sections.extend(["", f"##### {image_index}. {title}", ""])
+                if caption:
+                    sections.extend([caption, ""])
+                if image_data:
+                    sections.append(f"![{title}]({image_data})")
     return "\n".join(sections)
 
 
@@ -631,27 +645,6 @@ def render_custom_sections(data: dict[str, Any], section_number: int = 10) -> st
     return "\n".join(sections)
 
 
-def render_data_images(data: dict[str, Any], section_number: int = 10) -> str:
-    """渲染数据图片、图表和截图证据。"""
-    images = as_list(get_any(data, "data_images"))
-    if not images:
-        return ""
-
-    sections: Section = [f"## {section_number}. 数据图片与截图证据"]
-    for index, item in enumerate(images, start=1):
-        if not isinstance(item, dict):
-            continue
-        title = value(item, "title", f"图片证据 {index}")
-        image_data = value(item, "image_data", "")
-        caption = value(item, "caption", "")
-        sections.extend(["", f"### {section_number}.{index} {title}", ""])
-        if caption:
-            sections.extend([caption, ""])
-        if image_data:
-            sections.append(f"![{title}]({image_data})")
-    return "\n".join(sections)
-
-
 def generate_report(data: dict[str, Any]) -> str:
     product = get_any(data, "product", {})
     product_name = value(product, "name", "游戏产品")
@@ -679,10 +672,7 @@ def generate_report(data: dict[str, Any]) -> str:
         render_interview_summary(data),
         "",
     ]
-    image_sections = render_data_images(data, 10)
-    if image_sections:
-        sections.extend([image_sections, ""])
-    custom_sections = render_custom_sections(data, 11 if image_sections else 10)
+    custom_sections = render_custom_sections(data, 10)
     if custom_sections:
         sections.extend([custom_sections, ""])
     return "\n".join(sections)

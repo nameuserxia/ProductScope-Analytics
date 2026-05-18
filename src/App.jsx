@@ -30,7 +30,6 @@ const tabs = [
   { id: "modules", label: "功能模块", icon: Boxes },
   { id: "metrics", label: "指标体系", icon: BarChart3 },
   { id: "optimizations", label: "优化实验", icon: LineChart },
-  { id: "images", label: "图片证据", icon: ImagePlus },
   { id: "extensions", label: "扩展章节", icon: Layers3 },
   { id: "preview", label: "报告预览", icon: Eye },
 ];
@@ -194,6 +193,7 @@ function App() {
         可优化方向: [],
         关联模块: [],
         关键指标: [],
+        图片证据: [],
         可验证的数据分析方法: [],
       },
     ];
@@ -262,7 +262,7 @@ function App() {
     downloadFile("productscope-report.md", markdown, "text/markdown;charset=utf-8");
   };
 
-  const handleImageUpload = async (event) => {
+  const handleModuleImageUpload = async (event) => {
     const files = Array.from(event.target.files || []);
     if (!files.length) return;
 
@@ -287,10 +287,8 @@ function App() {
     }
 
     if (acceptedImages.length) {
-      setData((current) => ({
-        ...current,
-        数据图片: [...ensureArray(current["数据图片"]), ...acceptedImages],
-      }));
+      const nextImages = [...ensureArray(selected["图片证据"]), ...acceptedImages];
+      updateModule(selectedModule, { 图片证据: nextImages });
     }
     setImportError(skippedFiles.length ? `部分图片未导入：${skippedFiles.join("；")}` : "");
     event.target.value = "";
@@ -433,7 +431,7 @@ function App() {
             {activeTab === "modules" && (
               <Panel
                 title="功能模块"
-                note="每个模块都回答：为什么存在、服务谁、影响什么指标、如何验证优化。"
+                note="每个模块都回答：为什么存在、服务谁、影响什么指标、如何验证优化；图片证据也跟随模块保存。"
                 action={
                   <button className="mini-button" onClick={addModule}>
                     <Plus size={16} />
@@ -491,6 +489,21 @@ function App() {
                       label="可验证的数据分析方法"
                       value={lineJoin(selected["可验证的数据分析方法"])}
                       onChange={(value) => updateModule(selectedModule, { 可验证的数据分析方法: lineSplit(value) })}
+                    />
+                    <div className="module-evidence-head">
+                      <div>
+                        <h3>模块图片证据</h3>
+                        <p>上传这个模块对应的图表、路径截图、竞品截图或问题证据。</p>
+                      </div>
+                      <input ref={imageFileRef} type="file" accept="image/*" multiple onChange={handleModuleImageUpload} hidden />
+                      <button className="mini-button" onClick={() => imageFileRef.current?.click()}>
+                        <ImagePlus size={16} />
+                        上传图片
+                      </button>
+                    </div>
+                    <ModuleImageEvidenceEditor
+                      images={ensureArray(selected["图片证据"])}
+                      onChange={(nextImages) => updateModule(selectedModule, { 图片证据: nextImages })}
                     />
                   </div>
                 </div>
@@ -550,24 +563,6 @@ function App() {
             {activeTab === "optimizations" && (
               <Panel title="优化实验" note="建议始终写清楚问题、指标、方案、风险、A/B Test 和成功标准。">
                 <OptimizationEditor data={data} setData={setData} />
-              </Panel>
-            )}
-
-            {activeTab === "images" && (
-              <Panel
-                title="图片证据"
-                note="上传图表、漏斗截图、留存曲线或竞品截图，让报告有可视化证据。单张建议小于 2MB。"
-                action={
-                  <>
-                    <input ref={imageFileRef} type="file" accept="image/*" multiple onChange={handleImageUpload} hidden />
-                    <button className="mini-button" onClick={() => imageFileRef.current?.click()}>
-                      <ImagePlus size={16} />
-                      上传图片
-                    </button>
-                  </>
-                }
-              >
-                <ImageEvidenceEditor data={data} setData={setData} />
               </Panel>
             )}
 
@@ -738,23 +733,23 @@ function ExtensionEditor({ data, setData }) {
   );
 }
 
-function ImageEvidenceEditor({ data, setData }) {
-  const rows = ensureArray(data["数据图片"]);
+function ModuleImageEvidenceEditor({ images, onChange }) {
+  const rows = ensureArray(images);
   const update = (index, patch) => {
     const next = clone(rows);
     next[index] = { ...next[index], ...patch };
-    setData((current) => ({ ...current, 数据图片: next }));
+    onChange(next);
   };
   const remove = (index) => {
-    setData((current) => ({ ...current, 数据图片: rows.filter((_, itemIndex) => itemIndex !== index) }));
+    onChange(rows.filter((_, itemIndex) => itemIndex !== index));
   };
 
   if (!rows.length) {
     return (
       <div className="empty-state">
         <ImagePlus size={34} />
-        <strong>还没有图片证据</strong>
-        <p>上传留存曲线、漏斗截图、指标异常图、竞品截图或用户路径截图，报告会自动生成图片章节。</p>
+        <strong>这个模块还没有图片证据</strong>
+        <p>上传和当前模块直接相关的留存曲线、漏斗截图、指标异常图、竞品截图或用户路径截图。</p>
       </div>
     );
   }
@@ -794,7 +789,7 @@ function getQualityChecks(data) {
     { label: "广告变现", done: text.includes("广告") || text.includes("eCPM") },
     { label: "用户分层", done: text.includes("分层") || text.includes("高价值用户") },
     { label: "A/B Test", done: text.includes("A/B Test") || text.includes("实验组") },
-    { label: "图片证据", done: ensureArray(data["数据图片"]).length > 0 },
+    { label: "模块图片", done: modules.some((module) => ensureArray(module["图片证据"]).length > 0) },
     { label: "模块拆解", done: modules.length >= 3 },
     { label: "优化建议", done: optimizations.length >= 1 },
   ];

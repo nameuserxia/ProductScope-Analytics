@@ -39,7 +39,6 @@ export function generateMarkdown(data) {
   const couplings = list(get(data, "模块耦合关系", []));
   const optimizations = list(get(data, "优化建议", []));
   const interview = get(data, "面试表达版总结", {});
-  const dataImages = list(get(data, "数据图片", []));
   const customSections = list(get(data, "自定义扩展章节", []));
 
   const lines = [
@@ -131,6 +130,7 @@ export function generateMarkdown(data) {
   ];
 
   modules.forEach((module, index) => {
+    const moduleImages = list(get(module, "图片证据", []));
     lines.push(
       "",
       `### 4.${index + 1} ${get(module, "模块名称", "未命名模块")}`,
@@ -170,6 +170,19 @@ export function generateMarkdown(data) {
       "",
       bullets(get(module, "可验证的数据分析方法", []))
     );
+    if (moduleImages.length) {
+      lines.push("", "#### 图片证据");
+      moduleImages.forEach((image, imageIndex) => {
+        lines.push(
+          "",
+          `##### ${imageIndex + 1}. ${get(image, "标题", "图片证据")}`,
+          "",
+          get(image, "说明", ""),
+          "",
+          `![${get(image, "标题", "图片证据")}](${get(image, "图片数据", "")})`
+        );
+      });
+    }
   });
 
   lines.push("", "## 5. 用户体验路径分析");
@@ -286,22 +299,8 @@ export function generateMarkdown(data) {
     bullets(get(interview, "能力", []))
   );
 
-  if (dataImages.length) {
-    lines.push("", "## 10. 数据图片与截图证据");
-    dataImages.forEach((image, index) => {
-      lines.push(
-        "",
-        `### 10.${index + 1} ${get(image, "标题", "图片证据")}`,
-        "",
-        get(image, "说明", ""),
-        "",
-        `![${get(image, "标题", "图片证据")}](${get(image, "图片数据", "")})`
-      );
-    });
-  }
-
   if (customSections.length) {
-    const sectionNumber = dataImages.length ? 11 : 10;
+    const sectionNumber = 10;
     lines.push("", `## ${sectionNumber}. 自定义扩展分析`);
     customSections.forEach((section, index) => {
       lines.push(
