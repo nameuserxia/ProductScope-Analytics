@@ -28,7 +28,8 @@ import { generateMarkdown } from "./report.js";
 
 const tabs = [
   { id: "basic", label: "基础信息", icon: Target },
-  { id: "position", label: "定位玩法", icon: Sparkles },
+  { id: "position", label: "产品定位", icon: Sparkles },
+  { id: "gameplay", label: "核心玩法", icon: Target },
   { id: "modules", label: "功能模块", icon: Boxes },
   { id: "metrics", label: "指标体系", icon: BarChart3 },
   { id: "optimizations", label: "优化实验", icon: LineChart },
@@ -135,6 +136,7 @@ function App() {
   const product = data["产品基础信息"] || {};
   const modules = ensureArray(data["功能模块拆解"]);
   const metrics = data["数据指标体系"] || {};
+  const gameplay = data["核心玩法拆解"] || {};
   const markdown = useMemo(() => generateMarkdown(data), [data]);
   const previewHtml = useMemo(() => marked.parse(markdown), [markdown]);
   const quality = useMemo(() => getQualityChecks(data), [data]);
@@ -387,7 +389,7 @@ function App() {
             )}
 
             {activeTab === "position" && (
-              <Panel title="定位玩法" note="用短句写用户需求、卖点和核心循环，便于面试时直接复述。">
+              <Panel title="产品定位" note="用短句写清楚用户需求、卖点、差异化和用户为什么要玩。">
                 <TextareaList
                   label="用户需求"
                   value={lineJoin(data["产品定位分析"]?.["用户需求"])}
@@ -403,11 +405,14 @@ function App() {
                   value={lineJoin(data["产品定位分析"]?.["差异化竞争点"])}
                   onChange={(value) => updateListSection("产品定位分析", "差异化竞争点", lineSplit(value))}
                 />
-                <TextareaList
-                  label="核心循环"
-                  value={lineJoin(data["核心玩法拆解"]?.["核心循环"])}
-                  onChange={(value) => updateListSection("核心玩法拆解", "核心循环", lineSplit(value))}
-                />
+                <Field label="用户为什么要玩">
+                  <SmartTextarea
+                    label="用户为什么要玩"
+                    value={data["产品定位分析"]?.["用户为什么要玩"] || ""}
+                    onChange={(value) => updateListSection("产品定位分析", "用户为什么要玩", value)}
+                    openFullscreen={setFullscreenEditor}
+                  />
+                </Field>
                 <EvidenceSection
                   title="定位分析图片证据"
                   note="可上传用户画像、竞品定位图、用户需求脑图或使用场景图。"
@@ -415,10 +420,52 @@ function App() {
                   onChange={(nextImages) => updateListSection("产品定位分析", "图片证据", nextImages)}
                   setError={setImportError}
                 />
+              </Panel>
+            )}
+
+            {activeTab === "gameplay" && (
+              <Panel title="核心玩法拆解" note="完整编辑第 3 章：核心循环、完整路径、爽点、成长路径和目标反馈成就。">
+                <TextareaList
+                  label="核心循环"
+                  value={lineJoin(gameplay["核心循环"])}
+                  onChange={(value) => updateListSection("核心玩法拆解", "核心循环", lineSplit(value))}
+                />
+                <JourneyTableEditor
+                  title="完整路径"
+                  rows={ensureArray(gameplay["完整路径"])}
+                  onChange={(rows) => updateListSection("核心玩法拆解", "完整路径", rows)}
+                />
+                <TextareaList
+                  label="核心爽点"
+                  value={lineJoin(gameplay["核心爽点"])}
+                  onChange={(value) => updateListSection("核心玩法拆解", "核心爽点", lineSplit(value))}
+                />
+                <TextareaList
+                  label="成长路径"
+                  value={lineJoin(gameplay["成长路径"])}
+                  onChange={(value) => updateListSection("核心玩法拆解", "成长路径", lineSplit(value))}
+                />
+                <div className="form-grid">
+                  {["目标感", "反馈感", "成就感"].map((field) => (
+                    <Field label={field} key={field}>
+                      <SmartTextarea
+                        label={field}
+                        value={gameplay["目标反馈成就"]?.[field] || ""}
+                        onChange={(value) =>
+                          updateListSection("核心玩法拆解", "目标反馈成就", {
+                            ...(gameplay["目标反馈成就"] || {}),
+                            [field]: value,
+                          })
+                        }
+                        openFullscreen={setFullscreenEditor}
+                      />
+                    </Field>
+                  ))}
+                </div>
                 <EvidenceSection
                   title="核心玩法图片证据"
                   note="可上传核心循环图、玩法流程图、成长路径图或系统关系图。"
-                  images={ensureArray(data["核心玩法拆解"]?.["图片证据"])}
+                  images={ensureArray(gameplay["图片证据"])}
                   onChange={(nextImages) => updateListSection("核心玩法拆解", "图片证据", nextImages)}
                   setError={setImportError}
                 />
@@ -627,6 +674,59 @@ function TextareaList({ label, value, onChange }) {
       <span>{label}</span>
       <textarea className="list-textarea smart-textarea" value={value || ""} onChange={(event) => onChange(event.target.value)} />
     </label>
+  );
+}
+
+function JourneyTableEditor({ title, rows, onChange }) {
+  const updateRow = (index, patch) => {
+    const next = [...rows];
+    next[index] = { ...next[index], ...patch };
+    onChange(next);
+  };
+  const addRow = () => {
+    onChange([
+      ...rows,
+      {
+        步骤: "新步骤",
+        用户行为: "待补充",
+        系统反馈: "待补充",
+        用户心理: "待补充",
+        可能流失点: "待补充",
+        指标: "待补充",
+      },
+    ]);
+  };
+  const removeRow = (index) => onChange(rows.filter((_, itemIndex) => itemIndex !== index));
+
+  return (
+    <section className="journey-editor">
+      <div className="inline-title-row">
+        <h3>{title}</h3>
+        <button className="mini-button" onClick={addRow}>
+          <Plus size={16} />
+          新增步骤
+        </button>
+      </div>
+      <div className="journey-stack">
+        {rows.map((row, index) => (
+          <article className="journey-card" key={`${row["步骤"]}-${index}`}>
+            <div className="metric-row-head">
+              <input value={row["步骤"] || ""} onChange={(event) => updateRow(index, { 步骤: event.target.value })} />
+              <button className="icon-button danger" onClick={() => removeRow(index)} title="删除步骤">
+                <Trash2 size={16} />
+              </button>
+            </div>
+            <div className="metric-grid">
+              {["用户行为", "系统反馈", "用户心理", "可能流失点", "指标"].map((field) => (
+                <Field label={field} key={field}>
+                  <textarea value={row[field] || ""} onChange={(event) => updateRow(index, { [field]: event.target.value })} />
+                </Field>
+              ))}
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
   );
 }
 

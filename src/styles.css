@@ -698,7 +698,8 @@ textarea:focus {
 }
 
 .metric-row,
-.experiment-block {
+.experiment-block,
+.journey-card {
   padding: 14px;
   background: #f9fbfc;
   border: 1px solid #dce5eb;
@@ -707,6 +708,23 @@ textarea:focus {
 
 .metric-grid {
   margin-top: 12px;
+}
+
+.journey-editor {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.journey-editor h3 {
+  margin: 0;
+  color: #17212b;
+  font-size: 16px;
+}
+
+.journey-stack {
+  display: grid;
+  gap: 12px;
 }
 
 .self-start {
