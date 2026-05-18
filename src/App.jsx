@@ -126,7 +126,6 @@ function App() {
     }
   });
   const fileRef = useRef(null);
-  const imageFileRef = useRef(null);
   const firstSaveRef = useRef(true);
 
   const product = data["产品基础信息"] || {};
@@ -262,38 +261,6 @@ function App() {
     downloadFile("productscope-report.md", markdown, "text/markdown;charset=utf-8");
   };
 
-  const handleModuleImageUpload = async (event) => {
-    const files = Array.from(event.target.files || []);
-    if (!files.length) return;
-
-    const acceptedImages = [];
-    const skippedFiles = [];
-    for (const file of files) {
-      if (!file.type.startsWith("image/")) {
-        skippedFiles.push(`${file.name} 不是图片`);
-        continue;
-      }
-      if (file.size > maxImageSize) {
-        skippedFiles.push(`${file.name} 超过 2MB`);
-        continue;
-      }
-      const dataUrl = await readFileAsDataUrl(file);
-      acceptedImages.push({
-        标题: file.name.replace(/\.[^.]+$/, ""),
-        说明: "补充这张图对应的数据结论、用户路径证据或问题证据。",
-        文件名: file.name,
-        图片数据: dataUrl,
-      });
-    }
-
-    if (acceptedImages.length) {
-      const nextImages = [...ensureArray(selected["图片证据"]), ...acceptedImages];
-      updateModule(selectedModule, { 图片证据: nextImages });
-    }
-    setImportError(skippedFiles.length ? `部分图片未导入：${skippedFiles.join("；")}` : "");
-    event.target.value = "";
-  };
-
   const resetDraft = () => {
     const nextData = parseYaml(sampleYaml);
     setData(nextData);
@@ -400,6 +367,13 @@ function App() {
                     </Field>
                   ))}
                 </div>
+                <EvidenceSection
+                  title="基础信息图片证据"
+                  note="可上传产品截图、版本记录、体验环境截图或作品集封面草图。"
+                  images={ensureArray(product["图片证据"])}
+                  onChange={(nextImages) => updateProduct("图片证据", nextImages)}
+                  setError={setImportError}
+                />
               </Panel>
             )}
 
@@ -424,6 +398,20 @@ function App() {
                   label="核心循环"
                   value={lineJoin(data["核心玩法拆解"]?.["核心循环"])}
                   onChange={(value) => updateListSection("核心玩法拆解", "核心循环", lineSplit(value))}
+                />
+                <EvidenceSection
+                  title="定位分析图片证据"
+                  note="可上传用户画像、竞品定位图、用户需求脑图或使用场景图。"
+                  images={ensureArray(data["产品定位分析"]?.["图片证据"])}
+                  onChange={(nextImages) => updateListSection("产品定位分析", "图片证据", nextImages)}
+                  setError={setImportError}
+                />
+                <EvidenceSection
+                  title="核心玩法图片证据"
+                  note="可上传核心循环图、玩法流程图、成长路径图或系统关系图。"
+                  images={ensureArray(data["核心玩法拆解"]?.["图片证据"])}
+                  onChange={(nextImages) => updateListSection("核心玩法拆解", "图片证据", nextImages)}
+                  setError={setImportError}
                 />
               </Panel>
             )}
@@ -490,20 +478,12 @@ function App() {
                       value={lineJoin(selected["可验证的数据分析方法"])}
                       onChange={(value) => updateModule(selectedModule, { 可验证的数据分析方法: lineSplit(value) })}
                     />
-                    <div className="module-evidence-head">
-                      <div>
-                        <h3>模块图片证据</h3>
-                        <p>上传这个模块对应的图表、路径截图、竞品截图或问题证据。</p>
-                      </div>
-                      <input ref={imageFileRef} type="file" accept="image/*" multiple onChange={handleModuleImageUpload} hidden />
-                      <button className="mini-button" onClick={() => imageFileRef.current?.click()}>
-                        <ImagePlus size={16} />
-                        上传图片
-                      </button>
-                    </div>
-                    <ModuleImageEvidenceEditor
+                    <EvidenceSection
+                      title="模块图片证据"
+                      note="上传这个模块对应的图表、路径截图、竞品截图或问题证据。"
                       images={ensureArray(selected["图片证据"])}
                       onChange={(nextImages) => updateModule(selectedModule, { 图片证据: nextImages })}
+                      setError={setImportError}
                     />
                   </div>
                 </div>
@@ -557,18 +537,25 @@ function App() {
                     </article>
                   ))}
                 </div>
+                <EvidenceSection
+                  title="指标体系图片证据"
+                  note="可上传指标树、北极星指标图、漏斗图、留存曲线或数据看板截图。"
+                  images={ensureArray(metrics["图片证据"])}
+                  onChange={(nextImages) => updateSection("数据指标体系", { ...metrics, 图片证据: nextImages })}
+                  setError={setImportError}
+                />
               </Panel>
             )}
 
             {activeTab === "optimizations" && (
               <Panel title="优化实验" note="建议始终写清楚问题、指标、方案、风险、A/B Test 和成功标准。">
-                <OptimizationEditor data={data} setData={setData} />
+                <OptimizationEditor data={data} setData={setData} setError={setImportError} />
               </Panel>
             )}
 
             {activeTab === "extensions" && (
               <Panel title="扩展章节" note="这里用来放竞品、埋点、SQL、访谈、截图观察和版本复盘。">
-                <ExtensionEditor data={data} setData={setData} />
+                <ExtensionEditor data={data} setData={setData} setError={setImportError} />
               </Panel>
             )}
 
@@ -631,6 +618,30 @@ function TextareaList({ label, value, onChange }) {
   );
 }
 
+async function readImagesFromFiles(files, setError) {
+  const acceptedImages = [];
+  const skippedFiles = [];
+  for (const file of files) {
+    if (!file.type.startsWith("image/")) {
+      skippedFiles.push(`${file.name} 不是图片`);
+      continue;
+    }
+    if (file.size > maxImageSize) {
+      skippedFiles.push(`${file.name} 超过 2MB`);
+      continue;
+    }
+    const dataUrl = await readFileAsDataUrl(file);
+    acceptedImages.push({
+      标题: file.name.replace(/\.[^.]+$/, ""),
+      说明: "补充这张图对应的数据结论、用户路径证据或问题证据。",
+      文件名: file.name,
+      图片数据: dataUrl,
+    });
+  }
+  setError(skippedFiles.length ? `部分图片未导入：${skippedFiles.join("；")}` : "");
+  return acceptedImages;
+}
+
 function readFileAsDataUrl(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -640,7 +651,39 @@ function readFileAsDataUrl(file) {
   });
 }
 
-function OptimizationEditor({ data, setData }) {
+function EvidenceSection({ title, note, images, onChange, setError }) {
+  const inputRef = useRef(null);
+  const rows = ensureArray(images);
+
+  const handleUpload = async (event) => {
+    const files = Array.from(event.target.files || []);
+    if (!files.length) return;
+    const acceptedImages = await readImagesFromFiles(files, setError);
+    if (acceptedImages.length) {
+      onChange([...rows, ...acceptedImages]);
+    }
+    event.target.value = "";
+  };
+
+  return (
+    <section className="evidence-section">
+      <div className="evidence-head">
+        <div>
+          <h3>{title}</h3>
+          <p>{note}</p>
+        </div>
+        <input ref={inputRef} type="file" accept="image/*" multiple onChange={handleUpload} hidden />
+        <button className="mini-button" onClick={() => inputRef.current?.click()}>
+          <ImagePlus size={16} />
+          上传图片
+        </button>
+      </div>
+      <ImageEvidenceEditor images={rows} onChange={onChange} />
+    </section>
+  );
+}
+
+function OptimizationEditor({ data, setData, setError }) {
   const rows = ensureArray(data["优化建议"]);
   const update = (index, patch) => {
     const next = clone(rows);
@@ -693,13 +736,20 @@ function OptimizationEditor({ data, setData }) {
           </div>
           <TextareaList label="影响用户" value={lineJoin(item["影响用户"])} onChange={(value) => update(index, { 影响用户: lineSplit(value) })} />
           <TextareaList label="影响指标" value={lineJoin(item["影响指标"])} onChange={(value) => update(index, { 影响指标: lineSplit(value) })} />
+          <EvidenceSection
+            title="优化建议图片证据"
+            note="可上传问题截图、实验方案图、A/B Test 分流图或指标变化图。"
+            images={ensureArray(item["图片证据"])}
+            onChange={(nextImages) => update(index, { 图片证据: nextImages })}
+            setError={setError}
+          />
         </article>
       ))}
     </div>
   );
 }
 
-function ExtensionEditor({ data, setData }) {
+function ExtensionEditor({ data, setData, setError }) {
   const rows = ensureArray(data["自定义扩展章节"]);
   const update = (index, patch) => {
     const next = clone(rows);
@@ -727,13 +777,20 @@ function ExtensionEditor({ data, setData }) {
             <textarea value={item["内容"] || ""} onChange={(event) => update(index, { 内容: event.target.value })} />
           </Field>
           <TextareaList label="分析要点" value={lineJoin(item["分析要点"])} onChange={(value) => update(index, { 分析要点: lineSplit(value) })} />
+          <EvidenceSection
+            title="扩展章节图片证据"
+            note="可上传竞品截图、埋点图、SQL 结果图、访谈归纳图或版本复盘图。"
+            images={ensureArray(item["图片证据"])}
+            onChange={(nextImages) => update(index, { 图片证据: nextImages })}
+            setError={setError}
+          />
         </article>
       ))}
     </div>
   );
 }
 
-function ModuleImageEvidenceEditor({ images, onChange }) {
+function ImageEvidenceEditor({ images, onChange }) {
   const rows = ensureArray(images);
   const update = (index, patch) => {
     const next = clone(rows);
@@ -748,8 +805,8 @@ function ModuleImageEvidenceEditor({ images, onChange }) {
     return (
       <div className="empty-state">
         <ImagePlus size={34} />
-        <strong>这个模块还没有图片证据</strong>
-        <p>上传和当前模块直接相关的留存曲线、漏斗截图、指标异常图、竞品截图或用户路径截图。</p>
+        <strong>这里还没有图片证据</strong>
+        <p>上传流程图、思维导图、数据图表、指标异常图、竞品截图或用户路径截图。</p>
       </div>
     );
   }
@@ -783,13 +840,19 @@ function getQualityChecks(data) {
   const text = JSON.stringify(data);
   const modules = ensureArray(data["功能模块拆解"]);
   const optimizations = ensureArray(data["优化建议"]);
+  const hasImages = (value) => {
+    if (!value || typeof value !== "object") return false;
+    if (Array.isArray(value)) return value.some(hasImages);
+    if (ensureArray(value["图片证据"]).length > 0) return true;
+    return Object.values(value).some(hasImages);
+  };
   return [
     { label: "留存指标", done: text.includes("留存") || text.includes("D1") },
     { label: "付费分析", done: text.includes("付费") || text.includes("ARPU") },
     { label: "广告变现", done: text.includes("广告") || text.includes("eCPM") },
     { label: "用户分层", done: text.includes("分层") || text.includes("高价值用户") },
     { label: "A/B Test", done: text.includes("A/B Test") || text.includes("实验组") },
-    { label: "模块图片", done: modules.some((module) => ensureArray(module["图片证据"]).length > 0) },
+    { label: "图片证据", done: hasImages(data) },
     { label: "模块拆解", done: modules.length >= 3 },
     { label: "优化建议", done: optimizations.length >= 1 },
   ];

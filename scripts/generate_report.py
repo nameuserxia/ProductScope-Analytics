@@ -228,7 +228,33 @@ def render_basic_info(data: dict[str, Any]) -> str:
         ["体验时间", value(product, "experience_time")],
         ["分析目标", value(product, "analysis_goal")],
     ]
-    return "\n".join(["## 1. 产品基础信息", "", table(["字段", "内容"], rows)])
+    sections = ["## 1. 产品基础信息", "", table(["字段", "内容"], rows)]
+    image_section = render_image_evidence(get_any(product, "module_images"), "基础信息图片证据", 3)
+    if image_section:
+        sections.extend(["", image_section])
+    return "\n".join(sections)
+
+
+def render_image_evidence(images: Any, heading: str = "图片证据", heading_level: int = 3) -> str:
+    image_items = as_list(images)
+    if not image_items:
+        return ""
+
+    heading_marks = "#" * heading_level
+    item_heading_marks = "#" * min(heading_level + 1, 6)
+    sections: Section = [f"{heading_marks} {heading}"]
+    for index, image in enumerate(image_items, start=1):
+        if not isinstance(image, dict):
+            continue
+        title = value(image, "title", f"图片证据 {index}")
+        caption = value(image, "caption", "")
+        image_data = value(image, "image_data", "")
+        sections.extend(["", f"{item_heading_marks} {index}. {title}", ""])
+        if caption:
+            sections.extend([caption, ""])
+        if image_data:
+            sections.append(f"![{title}]({image_data})")
+    return "\n".join(sections)
 
 
 def render_positioning(data: dict[str, Any]) -> str:
@@ -256,8 +282,7 @@ def render_positioning(data: dict[str, Any]) -> str:
                 ]
             )
 
-    return "\n".join(
-        [
+    sections = [
             "## 2. 产品定位分析",
             "",
             "### 用户需求",
@@ -284,7 +309,10 @@ def render_positioning(data: dict[str, Any]) -> str:
             "",
             value(positioning, "why_play"),
         ]
-    )
+    image_section = render_image_evidence(get_any(positioning, "module_images"), "定位分析图片证据", 3)
+    if image_section:
+        sections.extend(["", image_section])
+    return "\n".join(sections)
 
 
 def render_core_loop(data: dict[str, Any]) -> str:
@@ -311,8 +339,7 @@ def render_core_loop(data: dict[str, Any]) -> str:
             ["成就感", value(achievement, "achievement")],
         ]
 
-    return "\n".join(
-        [
+    sections = [
             "## 3. 核心玩法拆解",
             "",
             "### 核心循环",
@@ -338,7 +365,10 @@ def render_core_loop(data: dict[str, Any]) -> str:
             "",
             table(["维度", "设计说明"], achievement_rows or [["待补充", "待补充"]]),
         ]
-    )
+    image_section = render_image_evidence(get_any(core, "module_images"), "核心玩法图片证据", 3)
+    if image_section:
+        sections.extend(["", image_section])
+    return "\n".join(sections)
 
 
 def render_metric_table(metrics: list[Metric]) -> str:
@@ -492,6 +522,9 @@ def render_metrics(data: dict[str, Any]) -> str:
 
     for key, title in METRIC_CATEGORY_NAMES.items():
         sections.extend(["", f"### {title}", "", render_metric_table(as_list(get_any(metrics, key)))])
+    image_section = render_image_evidence(get_any(metrics, "module_images"), "指标体系图片证据", 3)
+    if image_section:
+        sections.extend(["", image_section])
     return "\n".join(sections)
 
 
@@ -574,6 +607,9 @@ def render_optimizations(data: dict[str, Any]) -> str:
                 table(["项目", "设计"], ab_rows or [["待补充", "待补充"]]),
             ]
         )
+        image_section = render_image_evidence(get_any(item, "module_images"), "优化建议图片证据", 4)
+        if image_section:
+            sections.extend(["", image_section])
     return "\n".join(sections)
 
 
@@ -640,8 +676,11 @@ def render_custom_sections(data: dict[str, Any], section_number: int = 10) -> st
             items = get_any(item, "items")
             if items:
                 sections.extend(["", bullet_list(items)])
+            image_section = render_image_evidence(get_any(item, "module_images"), "扩展章节图片证据", 4)
+            if image_section:
+                sections.extend(["", image_section])
         else:
-            sections.extend(["", f"### 10.{index} 补充分析", "", str(item)])
+            sections.extend(["", f"### {section_number}.{index} 补充分析", "", str(item)])
     return "\n".join(sections)
 
 

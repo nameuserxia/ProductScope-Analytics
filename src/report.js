@@ -29,6 +29,24 @@ const bullets = (items) => {
   return rows.length ? rows.map((item) => `- ${item}`).join("\n") : "- 待补充";
 };
 
+const pushImages = (lines, images, heading = "图片证据", headingLevel = 3) => {
+  const rows = list(images);
+  if (!rows.length) return;
+  const headingMarks = "#".repeat(headingLevel);
+  const itemHeadingMarks = "#".repeat(Math.min(headingLevel + 1, 6));
+  lines.push("", `${headingMarks} ${heading}`);
+  rows.forEach((image, index) => {
+    lines.push(
+      "",
+      `${itemHeadingMarks} ${index + 1}. ${get(image, "标题", "图片证据")}`,
+      "",
+      get(image, "说明", ""),
+      "",
+      `![${get(image, "标题", "图片证据")}](${get(image, "图片数据", "")})`
+    );
+  });
+};
+
 export function generateMarkdown(data) {
   const product = get(data, "产品基础信息", {});
   const positioning = get(data, "产品定位分析", {});
@@ -56,6 +74,11 @@ export function generateMarkdown(data) {
       ])
     ),
     "",
+  ];
+
+  pushImages(lines, get(product, "图片证据", []), "基础信息图片证据", 3);
+
+  lines.push(
     "## 2. 产品定位分析",
     "",
     "### 用户需求",
@@ -96,7 +119,12 @@ export function generateMarkdown(data) {
     "",
     "### 用户为什么要玩这款游戏",
     "",
-    get(positioning, "用户为什么要玩", "待补充"),
+    get(positioning, "用户为什么要玩", "待补充")
+  );
+
+  pushImages(lines, get(positioning, "图片证据", []), "定位分析图片证据", 3);
+
+  lines.push(
     "",
     "## 3. 核心玩法拆解",
     "",
@@ -124,10 +152,12 @@ export function generateMarkdown(data) {
     "",
     "### 成长路径",
     "",
-    bullets(get(gameplay, "成长路径", [])),
-    "",
-    "## 4. 功能模块拆解",
-  ];
+    bullets(get(gameplay, "成长路径", []))
+  );
+
+  pushImages(lines, get(gameplay, "图片证据", []), "核心玩法图片证据", 3);
+
+  lines.push("", "## 4. 功能模块拆解");
 
   modules.forEach((module, index) => {
     const moduleImages = list(get(module, "图片证据", []));
@@ -170,19 +200,7 @@ export function generateMarkdown(data) {
       "",
       bullets(get(module, "可验证的数据分析方法", []))
     );
-    if (moduleImages.length) {
-      lines.push("", "#### 图片证据");
-      moduleImages.forEach((image, imageIndex) => {
-        lines.push(
-          "",
-          `##### ${imageIndex + 1}. ${get(image, "标题", "图片证据")}`,
-          "",
-          get(image, "说明", ""),
-          "",
-          `![${get(image, "标题", "图片证据")}](${get(image, "图片数据", "")})`
-        );
-      });
-    }
+    pushImages(lines, moduleImages, "图片证据", 4);
   });
 
   lines.push("", "## 5. 用户体验路径分析");
@@ -226,6 +244,8 @@ export function generateMarkdown(data) {
       )
     );
   });
+
+  pushImages(lines, get(metrics, "图片证据", []), "指标体系图片证据", 3);
 
   lines.push(
     "",
@@ -272,6 +292,7 @@ export function generateMarkdown(data) {
         ["实验对象", "对照组", "实验组", "核心指标", "护栏指标", "实验周期"].map((key) => [key, get(ab, key)])
       )
     );
+    pushImages(lines, get(item, "图片证据", []), "优化建议图片证据", 4);
   });
 
   lines.push(
@@ -309,8 +330,9 @@ export function generateMarkdown(data) {
         "",
         get(section, "内容", ""),
         "",
-        bullets(get(section, "分析要点", []))
+      bullets(get(section, "分析要点", []))
       );
+      pushImages(lines, get(section, "图片证据", []), "扩展章节图片证据", 4);
     });
   }
 
